@@ -28,7 +28,14 @@ export function enqueueDiscussionRefresh(id: number) {
 }
 
 export function enqueuePasteRefresh(id: string) {
-  return createTask("save", { target: "paste", targetId: id });
+  return fetchApi<{ workflowId: string }>(
+    `/workflow/create/template/paste-save-pipeline`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ targetId: id }),
+    },
+  );
 }
 
 export function enqueueJudgementRefresh() {
