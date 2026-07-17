@@ -33,6 +33,7 @@ jobs:
       - name: Build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api.luogu.me' }}
+          VITE_JUDGEMENT_API_URL: ${{ secrets.VITE_JUDGEMENT_API_URL || 'https://jdmt.luogu.me' }}
         run: npm run build
 
       - name: Setup Pages

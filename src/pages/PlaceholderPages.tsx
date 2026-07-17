@@ -38,13 +38,3 @@ export function PastePlaceholder() {
     />
   );
 }
-
-export function JudgementPlaceholder() {
-  return (
-    <PlaceholderPage
-      title="陶片放逐未开放"
-      message="洛谷仓库目前仅收录文章存档，裁决模块暂不可用。"
-      icon={MessagesSquare}
-    />
-  );
-}

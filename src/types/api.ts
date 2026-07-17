@@ -82,3 +82,56 @@ export interface ApiSearchResult {
   limit: number;
   hasMore: boolean;
 }
+
+export interface ApiJudgementUser {
+  uid: number;
+  avatar: string;
+  name: string;
+  slogan: string | null;
+  badge: string | null;
+  isAdmin: boolean;
+  isBanned: boolean;
+  color: string;
+  ccfLevel: number;
+  xcpcLevel: number;
+  background: string;
+}
+
+export interface ApiJudgementRecord {
+  id: number;
+  uid: number;
+  name: string;
+  reason: string;
+  revoked_permission: number;
+  added_permission: number;
+  time: number;
+  user: ApiJudgementUser;
+  fetch_log_id: number;
+  log_fetched_at: string;
+  created_at: string;
+}
+
+export interface ApiJudgementPage {
+  records: ApiJudgementRecord[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ApiJudgementStats {
+  totalRecords: number;
+  totalFetches: number;
+}
+
+export interface ApiJudgementLogs {
+  logs: {
+    id: number;
+    fetchedAt: string;
+    recordCount: number;
+  }[];
+  page: number;
+  limit: number;
+  total: number;
+}
+

@@ -19,8 +19,8 @@ import DocPage from "@/pages/DocPage";
 import {
   DiscussionPlaceholder,
   PastePlaceholder,
-  JudgementPlaceholder,
 } from "@/pages/PlaceholderPages";
+import JudgementPage from "@/pages/JudgementPage";
 import { NotFoundTemplate } from "@/components/error/not-found-template";
 import { FileX2 } from "lucide-react";
 
@@ -62,7 +62,7 @@ const router = createBrowserRouter(
       { path: "/u/:id", element: <><ScrollToTop /><UserPage /></> },
       { path: "/d/:id", element: <><RouteTitle title="讨论" /><DiscussionPlaceholder /></> },
       { path: "/p/:id", element: <><RouteTitle title="剪贴板" /><PastePlaceholder /></> },
-      { path: "/judgement", element: <><RouteTitle title="陶片放逐" /><JudgementPlaceholder /></> },
+      { path: "/judgement", element: <><RouteTitle title="陶片放逐" /><JudgementPage /></> },
       { path: "/about", element: <><RouteTitle title="关于" /><DocPage /></> },
       { path: "/takedown", element: <><RouteTitle title="删除政策" /><DocPage /></> },
       { path: "/terms", element: <><RouteTitle title="用户协议" /><DocPage /></> },
