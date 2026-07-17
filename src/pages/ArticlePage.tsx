@@ -107,13 +107,6 @@ export default function ArticlePage() {
       if (nextPinned !== isMetaPinnedRef.current) {
         isMetaPinnedRef.current = nextPinned;
         setIsMetaPinned(nextPinned);
-        const node = floatingMetaRef.current;
-        if (node) {
-          const nextHeight = node.scrollHeight;
-          setFloatingMetaHeight((prev) =>
-            prev === nextHeight ? prev : nextHeight,
-          );
-        }
       }
     };
     const scheduleCheck = () => {
