@@ -306,11 +306,11 @@
     @apply rounded-2xl border border-border bg-background/90 p-4 backdrop-blur;
     position: fixed;
     inset-inline-start: calc(100% - 0.5rem);
-    top: 5rem;
+    top: 50%;
     left: 5rem;
     max-height: calc(100dvh - 6rem);
     width: 18rem;
-    transform: translate(-8px, 0);
+    transform: translate(-8px, -50%);
     opacity: 0;
     pointer-events: none;
     transition:
@@ -326,7 +326,7 @@
   .article-floating-toc-hitbox:hover .article-floating-toc-panel,
   .article-floating-toc-hitbox:focus-within .article-floating-toc-panel {
     opacity: 1;
-    transform: translate(0, 0);
+    transform: translate(0, -50%);
     pointer-events: auto;
   }
 
