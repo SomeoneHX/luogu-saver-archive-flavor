@@ -5,7 +5,9 @@ import path from "node:path";
 import { copyFileSync, existsSync } from "node:fs";
 
 export default defineConfig({
-  base: "/luogu-saver-archive-flavor/",
+  base: process.env.NODE_ENV === "production"
+    ? "/luogu-saver-archive-flavor/"
+    : "/",
   plugins: [
     react(),
     tailwindcss(),
