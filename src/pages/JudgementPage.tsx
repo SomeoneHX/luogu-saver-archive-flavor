@@ -277,8 +277,8 @@ export default function JudgementPage() {
 
   const stat = statsQuery.data
     ? {
-        totalRecords: statsQuery.data.totalRecords,
-        totalFetches: statsQuery.data.totalFetches,
+        totalRecords: statsQuery.data.totalRecords ?? 0,
+        totalFetches: statsQuery.data.totalFetches ?? 0,
         totalPages: data?.pages[0]?.totalPages ?? 1,
       }
     : { totalRecords: 0, totalFetches: 0, totalPages: 1 };

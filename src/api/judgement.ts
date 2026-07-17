@@ -81,8 +81,11 @@ export function getJudgements(params: JudgementQuery = {}) {
   }));
 }
 
-export function getJudgementStats() {
-  return fetchJudgement<ApiJudgementStats>("/api/stats");
+export function getJudgementStats(): Promise<ApiJudgementStats> {
+  return fetchJudgement<Record<string, number>>("/api/stats").then((raw) => ({
+    totalRecords: raw.total_judgements ?? raw.totalRecords ?? raw.total ?? 0,
+    totalFetches: raw.total_fetch_logs ?? raw.totalFetches ?? raw.fetches ?? 0,
+  }));
 }
 
 export function getJudgementLogs(page = 1, limit = 50) {
