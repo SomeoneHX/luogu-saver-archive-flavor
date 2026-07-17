@@ -199,7 +199,22 @@ API 请求会拼接为 `${VITE_API_URL}${path}`，并期望返回信封格式：
 
 构建产物输出到 `dist/`，为纯静态文件，可托管于任意静态服务器（Nginx、GitHub Pages、Cloudflare Pages 等）。
 
-推荐通过反向代理将后端 API 同源暴露，例如 Nginx：
+### GitHub Pages（推荐）
+
+仓库已内置 GitHub Actions 工作流（`.github/workflows/deploy.yml`），推送 `main` 分支即自动构建并部署：
+
+1. 在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+2. 推送/合并到 `main` 即可触发部署，站点地址为 `https://<用户名>.github.io/luogu-saver-archive-flavor/`。
+
+相关配置说明：
+
+- `vite.config.ts` 中已设置 `base: "/luogu-saver-archive-flavor/"`，与仓库名一致。
+- 构建后自动生成 `404.html`（内容与 `index.html` 相同），实现 SPA 刷新兜底；`public/.nojekyll` 避免 GitHub Pages 的 Jekyll 处理。
+- 前端通过 `VITE_API_URL` 访问后端。GitHub Pages 为纯静态托管，**无法同源代理后端 API**，因此通常需要将 `VITE_API_URL` 指向可跨域访问的后端地址（确保后端已开启 CORS）。也可通过 Cloudflare Pages / 自有服务器配合反向代理实现同源。
+
+### 自托管 / 反向代理
+
+若自行托管，推荐通过反向代理将后端 API 同源暴露，例如 Nginx：
 
 ```nginx
 location /api/ {
@@ -209,7 +224,7 @@ location /api/ {
 
 此时 `.env` 中 `VITE_API_URL` 留空即可。若后端为跨域独立域名，则在 `VITE_API_URL` 中填写完整基地址（需注意后端 CORS 配置）。
 
-SPA 需配置「兜底路由」：所有未命中静态资源的路径回退到 `index.html`，否则刷新子路由会 404。
+SPA 需配置「兜底路由」：所有未命中静态资源的路径回退到 `index.html`，否则刷新子路由会 404（GitHub Pages 已由 `404.html` 处理）。
 
 ---
 
