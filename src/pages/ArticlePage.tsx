@@ -103,6 +103,13 @@ export default function ArticlePage() {
         window.innerHeight || document.documentElement.clientHeight;
       const isVisible = rect.top >= TOP_OFFSET && rect.top < viewportHeight;
       setIsMetaPinned(!isVisible);
+      const node = floatingMetaRef.current;
+      if (node) {
+        const nextHeight = node.scrollHeight;
+        setFloatingMetaHeight((prev) =>
+          prev === nextHeight ? prev : nextHeight,
+        );
+      }
     };
     const scheduleCheck = () => {
       if (animationFrame !== 0) return;
@@ -138,7 +145,7 @@ export default function ArticlePage() {
     const observer = new ResizeObserver(() => updateHeight());
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [article, history]);
 
   const snapshot = React.useMemo(() => {
     if (!snapshotToken || !history) return null;
