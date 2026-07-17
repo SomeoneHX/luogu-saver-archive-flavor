@@ -144,11 +144,11 @@ export default function PastePage() {
         ]}
       />
 
-      {paste.deleted && (
+      {paste.deleted ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-700 dark:text-amber-300">
           该剪贴板已被删除（{paste.deleteReason || "管理员删除"}），以下内容仅供参考。
         </div>
-      )}
+      ) : null}
 
       <div
         className={cn(
