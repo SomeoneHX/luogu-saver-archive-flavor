@@ -22,6 +22,15 @@ export function ArticleFeedCard({
       ? getCategoryInfo(article.category).name
       : null;
   const summary = article.summary?.trim() || "";
+  const metrics = [
+    article.upvote ? { icon: ThumbsUp, children: `${article.upvote} 赞同` } : null,
+    article.favorCount ? { icon: Star, children: `${article.favorCount} 收藏` } : null,
+    article.viewCount ? { icon: CalendarClock, children: `浏览 ${article.viewCount}` } : null,
+    {
+      icon: MessageCircle,
+      children: `更新于 ${new Date(article.updatedAt).toLocaleDateString("zh-CN")}`,
+    },
+  ].filter((m): m is NonNullable<typeof m> => m !== null);
   return (
     <FeedCardTemplate
       href={href ?? `/a/${article.id}`}
@@ -32,18 +41,7 @@ export function ArticleFeedCard({
       content={summary || article.content?.replace(/[#>*`\[\]()\-]/g, "").slice(0, 200) || ""}
       contentMaxLines={summary ? undefined : 4}
       tags={article.tags?.length ? article.tags : undefined}
-      metrics={[
-        { icon: ThumbsUp, children: `${article.upvote ?? 0} 赞同` },
-        { icon: Star, children: `${article.favorCount ?? 0} 收藏` },
-        {
-          icon: CalendarClock,
-          children: `浏览 ${article.viewCount ?? 0}`,
-        },
-        {
-          icon: MessageCircle,
-          children: `更新于 ${new Date(article.updatedAt).toLocaleDateString("zh-CN")}`,
-        },
-      ]}
+      metrics={metrics}
       user={article.author}
     />
   );

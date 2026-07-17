@@ -22,6 +22,38 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NotFoundTemplate } from "@/components/error/not-found-template";
 import { FileX2 } from "lucide-react";
 
+function TocList({
+  items,
+  activeId,
+  onNavigate,
+}: {
+  items: TocItem[];
+  activeId: string | null;
+  onNavigate: (id: string) => void;
+}) {
+  return (
+    <ol className="article-toc-list space-y-0.5 text-sm">
+      {items.map((item) => (
+        <li key={item.id}>
+          <button
+            type="button"
+            className={cn(
+              "article-toc-entry",
+              `article-toc-level-${Math.min(Math.max(item.level, 2), 6)}`,
+              activeId === item.id && "article-toc-entry-active",
+            )}
+            onClick={() => onNavigate(item.id)}
+          >
+            <span className="line-clamp-1 truncate text-left" title={item.text}>
+              {item.text}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export default function ArticlePage() {
   const { id = "" } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,6 +82,63 @@ export default function ArticlePage() {
     null,
   );
   const [mobileTocOpen, setMobileTocOpen] = React.useState(false);
+
+  const hasToc = tocItems.length > 0;
+  const metaRowRef = React.useRef<HTMLDivElement | null>(null);
+  const floatingMetaRef = React.useRef<HTMLDivElement | null>(null);
+  const headerContainerRef = React.useRef<HTMLElement | null>(null);
+  const contentRef = React.useRef<HTMLElement | null>(null);
+  const [isMetaPinned, setIsMetaPinned] = React.useState(false);
+  const [floatingMetaHeight, setFloatingMetaHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    const TOP_OFFSET = 50;
+    let animationFrame = 0;
+    const runCheck = () => {
+      animationFrame = 0;
+      const target = metaRowRef.current;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const viewportHeight =
+        window.innerHeight || document.documentElement.clientHeight;
+      const isVisible = rect.top >= TOP_OFFSET && rect.top < viewportHeight;
+      setIsMetaPinned(!isVisible);
+    };
+    const scheduleCheck = () => {
+      if (animationFrame !== 0) return;
+      animationFrame = window.requestAnimationFrame(runCheck);
+    };
+    window.addEventListener("scroll", scheduleCheck, { passive: true });
+    window.addEventListener("resize", scheduleCheck);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => scheduleCheck())
+        : null;
+    if (resizeObserver && metaRowRef.current) {
+      resizeObserver.observe(metaRowRef.current);
+    }
+    runCheck();
+    return () => {
+      window.removeEventListener("scroll", scheduleCheck);
+      window.removeEventListener("resize", scheduleCheck);
+      if (animationFrame !== 0) window.cancelAnimationFrame(animationFrame);
+      resizeObserver?.disconnect();
+    };
+  }, []);
+
+  React.useLayoutEffect(() => {
+    const node = floatingMetaRef.current;
+    if (!node) return;
+    const updateHeight = () => {
+      const nextHeight = node.scrollHeight;
+      setFloatingMetaHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    };
+    updateHeight();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => updateHeight());
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const snapshot = React.useMemo(() => {
     if (!snapshotToken || !history) return null;
@@ -211,8 +300,52 @@ export default function ArticlePage() {
           { label: title, href: `/a/${article.id}` },
         ]}
       />
-      <div className="article-grid grid gap-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,3.2fr)] xl:grid-cols-[minmax(0,8fr)_minmax(0,2.7fr)]">
-        <main className="order-1 flex min-w-0 flex-col gap-8">
+      <div
+        className={cn(
+          "article-grid grid gap-8",
+          "lg:grid-cols-[minmax(0,8fr)_minmax(0,3.2fr)]",
+          "xl:grid-cols-[minmax(0,8fr)_minmax(0,2.7fr)]",
+          hasToc
+            ? "2xl:grid-cols-[minmax(0,2fr)_minmax(0,8fr)_minmax(0,3fr)]"
+            : "2xl:grid-cols-[minmax(0,3fr)_minmax(0,8fr)_minmax(0,3fr)]",
+        )}
+      >
+        {hasToc ? (
+          <aside className="hidden 2xl:order-1 2xl:flex 2xl:flex-col 2xl:gap-4">
+            <div className="article-toc-track">
+              <div className="article-toc-card sticky top-24">
+                <p className="article-toc-card-header">目录</p>
+                <TocList
+                  items={tocItems}
+                  activeId={activeHeadingId}
+                  onNavigate={scrollToHeading}
+                />
+              </div>
+            </div>
+          </aside>
+        ) : null}
+
+        {hasToc ? (
+          <div className="article-floating-toc pointer-events-none hidden lg:flex lg:items-center lg:justify-end 2xl:hidden">
+            <div className="article-floating-toc-hitbox">
+              <span className="article-floating-toc-button">
+                <ListTree className="size-4" />
+              </span>
+              <div className="article-floating-toc-panel">
+                <div className="article-toc-card">
+                  <p className="article-toc-card-header">目录</p>
+                  <TocList
+                    items={tocItems}
+                    activeId={activeHeadingId}
+                    onNavigate={scrollToHeading}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <main className="order-1 flex min-w-0 flex-col gap-8 2xl:order-2">
           {isSnapshot ? (
             <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-700 dark:text-amber-300">
               正在查看历史快照（{ABSOLUTE_DATE_FORMATTER.format(capturedAt)}）。
@@ -227,7 +360,7 @@ export default function ArticlePage() {
               </button>
             </div>
           ) : null}
-          <header className="space-y-4">
+          <header className="space-y-4" ref={headerContainerRef}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1 space-y-3">
                 <p className="text-sm font-medium text-muted-foreground">
@@ -237,7 +370,7 @@ export default function ArticlePage() {
                   {title}
                 </h1>
               </div>
-              {tocItems.length > 0 ? (
+              {hasToc ? (
                 <button
                   type="button"
                   className="article-toc-mobile-trigger inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground transition hover:border-foreground/40 hover:text-foreground lg:hidden"
@@ -247,15 +380,17 @@ export default function ArticlePage() {
                 </button>
               ) : null}
             </div>
-            <ArticleMetaRow article={metaArticle} />
+            <div ref={metaRowRef}>
+              <ArticleMetaRow article={metaArticle} />
+            </div>
           </header>
 
-          <section className="space-y-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <section
+            ref={contentRef}
+            className="space-y-6 text-base leading-relaxed text-muted-foreground sm:text-lg"
+          >
             {markdownSource ? (
-              <Markdown
-                enableHeadingAnchors
-                onHeadings={setTocItems}
-              >
+              <Markdown enableHeadingAnchors onHeadings={setTocItems}>
                 {markdownSource}
               </Markdown>
             ) : (
@@ -269,48 +404,54 @@ export default function ArticlePage() {
           />
         </main>
 
-        <aside className="order-2 hidden lg:block">
-          <div className="sticky top-24 flex flex-col gap-4">
-            {tocItems.length > 0 ? (
-              <div className="rounded-2xl border p-4">
-                <p className="mb-3 text-base font-semibold text-muted-foreground uppercase">
-                  目录
-                </p>
-                <ol className="article-toc-list space-y-0.5 text-sm">
-                  {tocItems.map((item) => (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        className={cn(
-                          "article-toc-entry",
-                          `article-toc-level-${Math.min(Math.max(item.level, 2), 6)}`,
-                          activeHeadingId === item.id &&
-                            "article-toc-entry-active",
-                        )}
-                        onClick={() => scrollToHeading(item.id)}
-                      >
-                        <span
-                          className="line-clamp-1 truncate text-left"
-                          title={item.text}
-                        >
-                          {item.text}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ) : null}
-            <ArticleOperationPanel
-              article={{
-                lid: article.id,
-                replyCount: commentsCount,
-                snapshotsCount: history?.length ?? 1,
-                capturedAt,
-                lastSeenAt,
+        <aside className="order-2 hidden lg:order-2 lg:block 2xl:order-3">
+          <div className="sticky top-24.25 flex flex-col gap-4">
+            <div
+              className="grid transition-[grid-template-rows,gap] duration-300 ease-out"
+              style={{
+                gridTemplateRows: `${isMetaPinned ? floatingMetaHeight : 0}px auto`,
+                gap: isMetaPinned ? "14px" : "0px",
               }}
-              onOpenWayback={openWayback}
-            />
+            >
+              <div
+                className={cn(
+                  "relative h-full transition-opacity duration-300 ease-out",
+                  isMetaPinned ? "opacity-100" : "opacity-0",
+                )}
+              >
+                <div className="h-full overflow-hidden">
+                  <div ref={floatingMetaRef} className="pb-2.5">
+                    <div className="mb-2.5">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        专栏文章
+                      </p>
+                      <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                        {title}
+                      </h1>
+                    </div>
+                    <ArticleMetaRow article={metaArticle} compact />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={cn(
+                  "transition-transform duration-300 ease-out will-change-transform",
+                  isMetaPinned ? "translate-y-[2px]" : "translate-y-0",
+                )}
+              >
+                <ArticleOperationPanel
+                  article={{
+                    lid: article.id,
+                    replyCount: commentsCount,
+                    snapshotsCount: history?.length ?? 1,
+                    capturedAt,
+                    lastSeenAt,
+                  }}
+                  onOpenWayback={openWayback}
+                />
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -336,29 +477,11 @@ export default function ArticlePage() {
               </button>
             </div>
             <div className="max-h-[80dvh] overflow-y-auto pr-1">
-              <ol className="article-toc-list space-y-0.5 text-sm">
-                {tocItems.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      className={cn(
-                        "article-toc-entry",
-                        `article-toc-level-${Math.min(Math.max(item.level, 2), 6)}`,
-                        activeHeadingId === item.id &&
-                          "article-toc-entry-active",
-                      )}
-                      onClick={() => scrollToHeading(item.id)}
-                    >
-                      <span
-                        className="line-clamp-1 truncate text-left"
-                        title={item.text}
-                      >
-                        {item.text}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ol>
+              <TocList
+                items={tocItems}
+                activeId={activeHeadingId}
+                onNavigate={scrollToHeading}
+              />
             </div>
           </div>
         </div>

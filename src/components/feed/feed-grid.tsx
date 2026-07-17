@@ -2,38 +2,49 @@ import * as React from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
-import { getRecentArticles } from "@/api/article";
-import type { ApiArticle } from "@/types/api";
+import { getPlaza } from "@/api/misc";
+import { getJudgements } from "@/api/judgement";
+import type { ApiArticle, ApiJudgementRecord } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { ArticleFeedCard } from "./feed-card";
+import { JudgementFeedCard } from "./judgement-feed-card";
 import { useResponsiveColumnCount } from "./use-responsive-column-count";
 
-const PAGE_SIZE = 20;
+const ARTICLE_PAGE_SIZE = 20;
+const JUDGEMENT_PAGE_SIZE = 20;
 
-interface FeedPage {
-  items: ApiArticle[];
-  nextCursor: Date | null;
+type FeedItem =
+  | { kind: "article"; id: string; article: ApiArticle }
+  | { kind: "judgement"; id: string; record: ApiJudgementRecord };
+
+interface PageParam {
+  articleExclude: string[];
+  judgementPage: number;
 }
 
-async function fetchFeedPage(cursor: Date | null): Promise<FeedPage> {
-  const items = await getRecentArticles({
-    count: PAGE_SIZE,
-    updatedAfter: cursor ?? undefined,
-    truncatedCount: 400,
-  });
-  const sorted = [...items].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
-  const nextCursor =
-    sorted.length > 0
-      ? new Date(sorted[sorted.length - 1].updatedAt)
-      : null;
-  return { items: sorted, nextCursor };
+interface FeedPageData {
+  articleItems: FeedItem[];
+  judgementItems: FeedItem[];
+  articleExclude: string[];
+  judgementPage: number;
+  hasMoreArticles: boolean;
+  hasMoreJudgements: boolean;
+}
+
+function interleave<T, U>(a: T[], b: U[]): (T | U)[] {
+  const out: (T | U)[] = [];
+  const max = Math.max(a.length, b.length);
+  for (let i = 0; i < max; i += 1) {
+    if (i < a.length) out.push(a[i]);
+    if (i < b.length) out.push(b[i]);
+  }
+  return out;
 }
 
 export function FeedGrid() {
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
   const columnCount = useResponsiveColumnCount();
+
   const {
     data,
     error,
@@ -42,21 +53,67 @@ export function FeedGrid() {
     isError,
     isFetchingNextPage,
     isPending,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ["feed"],
-    queryFn: ({ pageParam }) => fetchFeedPage(pageParam),
-    initialPageParam: null as Date | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    initialPageParam: { articleExclude: [], judgementPage: 1 } as PageParam,
+    queryFn: async ({ pageParam }) => {
+      const [articles, judgements] = await Promise.all([
+        getPlaza(ARTICLE_PAGE_SIZE, pageParam.articleExclude),
+        getJudgements({
+          page: pageParam.judgementPage,
+          limit: JUDGEMENT_PAGE_SIZE,
+        }),
+      ]);
+
+      const articleItems: FeedItem[] = articles.map((a) => ({
+        kind: "article" as const,
+        id: a.id,
+        article: a,
+      }));
+      const judgementItems: FeedItem[] = judgements.records.map((j) => ({
+        kind: "judgement" as const,
+        id: `j-${j.id}`,
+        record: j,
+      }));
+
+      const articleExclude = [...pageParam.articleExclude, ...articles.map((a) => a.id)];
+      const judgementPage = pageParam.judgementPage + 1;
+
+      return {
+        articleItems,
+        judgementItems,
+        articleExclude,
+        judgementPage,
+        hasMoreArticles: articles.length >= ARTICLE_PAGE_SIZE,
+        hasMoreJudgements: judgementPage <= judgements.totalPages,
+      } satisfies FeedPageData;
+    },
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMoreArticles || lastPage.hasMoreJudgements
+        ? { articleExclude: lastPage.articleExclude, judgementPage: lastPage.judgementPage }
+        : undefined,
   });
 
-  const items = React.useMemo(
-    () => (data ? data.pages.flatMap((p) => p.items) : []),
-    [data],
-  );
+  const items = React.useMemo<FeedItem[]>(() => {
+    const articleItems: FeedItem[] = [];
+    const judgementItems: FeedItem[] = [];
+    for (const page of data?.pages ?? []) {
+      articleItems.push(...page.articleItems);
+      judgementItems.push(...page.judgementItems);
+    }
+    return interleave(articleItems, judgementItems) as FeedItem[];
+  }, [data]);
+
+  const errorMessage = isError
+    ? error instanceof Error
+      ? error.message
+      : "加载失败"
+    : null;
 
   const columns = React.useMemo(() => {
     const bucketCount = Math.max(1, columnCount);
-    const buckets: ApiArticle[][] = Array.from({ length: bucketCount }, () => []);
+    const buckets: FeedItem[][] = Array.from({ length: bucketCount }, () => []);
     items.forEach((item, index) => {
       buckets[index % bucketCount].push(item);
     });
@@ -91,8 +148,8 @@ export function FeedGrid() {
   if (isError) {
     return (
       <div className="py-20 text-center text-destructive">
-        <p>加载失败：{error?.message ?? "未知错误"}</p>
-        <Button className="mt-4" onClick={() => void fetchNextPage()}>
+        <p>加载失败：{errorMessage ?? "未知错误"}</p>
+        <Button className="mt-4" onClick={() => void refetch()}>
           重试
         </Button>
       </div>
@@ -100,7 +157,7 @@ export function FeedGrid() {
   }
 
   if (items.length === 0) {
-    return <p className="py-20 text-center text-muted-foreground">暂无文章。</p>;
+    return <p className="py-20 text-center text-muted-foreground">暂无内容。</p>;
   }
 
   return (
@@ -113,9 +170,13 @@ export function FeedGrid() {
       >
         {columns.map((bucket, i) => (
           <div key={i} className="flex flex-col gap-6">
-            {bucket.map((article) => (
-              <ArticleFeedCard key={article.id} article={article} />
-            ))}
+            {bucket.map((item) =>
+              item.kind === "article" ? (
+                <ArticleFeedCard key={item.id} article={item.article} />
+              ) : (
+                <JudgementFeedCard key={item.id} record={item.record} />
+              ),
+            )}
           </div>
         ))}
       </div>
