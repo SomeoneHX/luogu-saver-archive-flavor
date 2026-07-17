@@ -448,6 +448,7 @@ export default function ArticlePage() {
                 <ArticleOperationPanel
                   article={{
                     lid: article.id,
+                    content: markdownSource,
                     replyCount: commentsCount,
                     snapshotsCount: history?.length ?? 1,
                     capturedAt,

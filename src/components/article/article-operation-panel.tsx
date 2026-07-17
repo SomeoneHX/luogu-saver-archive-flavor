@@ -20,6 +20,7 @@ export function ArticleOperationPanel({
 }: {
   article: {
     lid: string;
+    content: string | null;
     replyCount: number;
     snapshotsCount: number;
     capturedAt: Date;
@@ -32,9 +33,9 @@ export function ArticleOperationPanel({
   const { copy: copyBodyMarkdown, copied: copiedBodyMarkdown } = useClipboard();
 
   const originalLink = `https://www.luogu.com.cn/article/${article.lid}`;
-  const archiveLink = `/a/${article.lid}`;
-  const archiveSnapshotLink = `/a/${article.lid}?snapshot=${article.capturedAt.getTime().toString(36)}`;
-  const bodyMarkdown = originalLink;
+  const archiveLink = `https://luogu.store/a/${article.lid}`;
+  const archiveSnapshotLink = `https://luogu.store/a/${article.lid}@${article.capturedAt.getTime().toString(36)}`;
+  const bodyMarkdown = article.content ?? "";
 
   const triggerRefresh = React.useCallback(
     () => enqueueArticleRefresh(article.lid),

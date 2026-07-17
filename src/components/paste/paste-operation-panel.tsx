@@ -31,8 +31,8 @@ export function PasteOperationPanel({
   const { copy: copySourceMarkdown, copied: copiedSourceMarkdown } = useClipboard();
 
   const originalLink = `https://www.luogu.com.cn/paste/${paste.id}`;
-  const archiveLink = `/p/${paste.id}`;
-  const archiveSnapshotLink = `/p/${paste.id}?snapshot=${paste.time.getTime().toString(36)}`;
+  const archiveLink = `https://luogu.store/p/${paste.id}`;
+  const archiveSnapshotLink = `https://luogu.store/p/${paste.id}@${paste.time.getTime().toString(36)}`;
   const sourceMarkdown = paste.content ?? "";
 
   const triggerRefresh = React.useCallback(
