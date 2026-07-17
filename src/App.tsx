@@ -47,10 +47,13 @@ function RouteTitle({ title }: { title: string }) {
   return null;
 }
 
-const router = createBrowserRouter([
-  {
-    element: <Shell />,
-    children: [
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const router = createBrowserRouter(
+  [
+    {
+      element: <Shell />,
+      children: [
       { path: "/", element: <><RouteTitle title="首页" /><HomePage /></> },
       { path: "/recent", element: <><RouteTitle title="最近" /><RecentPage /></> },
       { path: "/explore", element: <><RouteTitle title="探索" /><ExplorePage /></> },
@@ -79,7 +82,8 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+],
+{ basename: routerBasename });
 
 export default function App() {
   return (
