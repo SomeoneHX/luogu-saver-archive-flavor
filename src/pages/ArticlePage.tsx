@@ -91,6 +91,7 @@ export default function ArticlePage() {
   const [isMetaPinned, setIsMetaPinned] = React.useState(false);
   const [floatingMetaHeight, setFloatingMetaHeight] = React.useState(0);
 
+  const isMetaPinnedRef = React.useRef(false);
   React.useEffect(() => {
     const TOP_OFFSET = 50;
     let animationFrame = 0;
@@ -102,13 +103,17 @@ export default function ArticlePage() {
       const viewportHeight =
         window.innerHeight || document.documentElement.clientHeight;
       const isVisible = rect.top >= TOP_OFFSET && rect.top < viewportHeight;
-      setIsMetaPinned(!isVisible);
-      const node = floatingMetaRef.current;
-      if (node) {
-        const nextHeight = node.scrollHeight;
-        setFloatingMetaHeight((prev) =>
-          prev === nextHeight ? prev : nextHeight,
-        );
+      const nextPinned = !isVisible;
+      if (nextPinned !== isMetaPinnedRef.current) {
+        isMetaPinnedRef.current = nextPinned;
+        setIsMetaPinned(nextPinned);
+        const node = floatingMetaRef.current;
+        if (node) {
+          const nextHeight = node.scrollHeight;
+          setFloatingMetaHeight((prev) =>
+            prev === nextHeight ? prev : nextHeight,
+          );
+        }
       }
     };
     const scheduleCheck = () => {
