@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Breadcrumb,
@@ -81,7 +81,7 @@ function InternalLink({
   const navigate = useNavigate();
   return (
     <a
-      href={href}
+      href={withBase(href)}
       className={className}
       tabIndex={tabIndex}
       onClick={(e) => {

@@ -6,6 +6,7 @@ import Container from "@/components/layout/container";
 import { BreadcrumbSetter } from "@/components/layout/breadcrumb-context";
 import { getUser, searchArticles } from "@/api/misc";
 import { ABSOLUTE_DATE_FORMATTER } from "@/lib/time";
+import { withBase } from "@/lib/utils";
 import { USER_COLOR_CLASS } from "@/components/user/user-inline-link";
 import { enqueueProfileRefresh } from "@/api/task";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ function UserArticles({ userId }: { userId: number }) {
       {data.hits.map((a) => (
         <a
           key={a.id}
-          href={`/a/${a.id}`}
+          href={withBase(`/a/${a.id}`)}
           className="block rounded-xl border bg-card p-4 transition hover:shadow-md"
         >
           <p className="font-medium text-foreground">{a.title}</p>

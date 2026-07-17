@@ -1,6 +1,6 @@
 import { BadgeCheck, PartyPopper } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Badge } from "../ui/badge";
@@ -85,7 +85,7 @@ export function UserInlineLink({
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();
-        window.history.pushState({}, "", `/u/${user.id}`);
+        window.history.pushState({}, "", withBase(`/u/${user.id}`));
         window.dispatchEvent(new PopStateEvent("popstate"));
       }}
     >

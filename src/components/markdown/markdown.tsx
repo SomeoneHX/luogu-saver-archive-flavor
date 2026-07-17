@@ -6,7 +6,7 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
 import remarkLuoguFlavor from "@/lib/remark-lda-lfm";
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 
 import MarkdownCodeBlock from "./markdown-code-block";
 import MarkdownSummary from "./markdown-summary";
@@ -183,7 +183,7 @@ export default function Markdown({
             if (mentionUid) {
               return (
                 <a
-                  href={`/u/${mentionUid}`}
+                  href={withBase(`/u/${mentionUid}`)}
                   className="ls-user-mention clear-markdown-style font-medium text-luogu-blue hover:underline"
                   onClick={(e) => {
                     if (
@@ -194,7 +194,7 @@ export default function Markdown({
                     )
                       return;
                     e.preventDefault();
-                    window.history.pushState({}, "", `/u/${mentionUid}`);
+                    window.history.pushState({}, "", withBase(`/u/${mentionUid}`));
                     window.dispatchEvent(new PopStateEvent("popstate"));
                   }}
                 >

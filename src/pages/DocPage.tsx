@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { DOCS } from "@/pages/docs";
 import { BreadcrumbSetter } from "@/components/layout/breadcrumb-context";
 import { NotFoundTemplate } from "@/components/error/not-found-template";
+import { withBase } from "@/lib/utils";
 import { FileX2 } from "lucide-react";
 
 function isInternalHref(href: string | undefined): boolean {
@@ -19,7 +20,7 @@ function InternalLink({ href, children }: { href?: string; children?: React.Reac
       if (!isInternalHref(href)) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
       e.preventDefault();
-      window.history.pushState({}, "", href);
+      window.history.pushState({}, "", withBase(href!));
       window.dispatchEvent(new PopStateEvent("popstate"));
     },
     [href],

@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import { ABSOLUTE_DATE_FORMATTER, formatRelativeTime } from "@/lib/time";
-import { cn } from "@/lib/utils";
+import { cn, withBase } from "@/lib/utils";
 import UserInlineLink, { type UserBasicInfo } from "@/components/user/user-inline-link";
 
 import MetaItem from "../meta/meta-item";
@@ -84,13 +84,13 @@ export default function FeedCardTemplate({
       >
         {href ? (
           <a
-            href={href}
+            href={withBase(href)}
             className="absolute inset-0 rounded-2xl"
             tabIndex={tabIndexOverride}
             onClick={(e) => {
               if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
               e.preventDefault();
-              window.history.pushState({}, "", href);
+              window.history.pushState({}, "", withBase(href));
               window.dispatchEvent(new PopStateEvent("popstate"));
             }}
           />
