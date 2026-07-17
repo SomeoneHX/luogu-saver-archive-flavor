@@ -115,7 +115,11 @@ function SidebarBrand({ variant }: { variant: "desktop" | "mobile" }) {
       )}
       tabIndex={variant === "desktop" ? -1 : 0}
     >
-      <img src="/piterator.svg" alt="Piterator" className="size-5" />
+      <img
+        src={`${import.meta.env.BASE_URL}piterator.svg`}
+        alt="Piterator"
+        className="size-5"
+      />
       {variant === "desktop" ? (
         <span className={desktopLabelClass}>洛谷仓库</span>
       ) : (
