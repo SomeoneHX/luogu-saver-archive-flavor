@@ -341,8 +341,6 @@ function UserTimeline({ userId, userName }: { userId: number; userName: string }
                       </p>
                     ) : null}
                     <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      <span>获赞 {item.upvote}</span>
-                      <span>收藏 {item.favorCount}</span>
                       {item.viewCount != null ? (
                         <span>浏览 {item.viewCount.toLocaleString("zh-CN")}</span>
                       ) : null}
