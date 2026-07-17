@@ -1,4 +1,4 @@
-# 洛谷仓库 · 前端（Flavor）
+# 洛谷仓库 · 风味版
 
 洛谷内容存档站点的前端单页应用（SPA）。本项目是 [luogu-archive](https://github.com/oi-zone/luogu-archive) 的一个前端分支（flavor），后端由 [luogu-saver](https://github.com/laikit-dev/luogu-saver) 提供。
 
