@@ -1,5 +1,5 @@
 import { fetchApi } from "./client";
-import type { ApiCommentsResponse, ApiUser, ApiArticle, ApiSearchResult } from "@/types/api";
+import type { ApiCommentsResponse, ApiUser, ApiArticle, ApiSearchResult, ApiPaste } from "@/types/api";
 
 export function getArticleComments(id: string) {
   return fetchApi<ApiCommentsResponse>(`/article/comments/${id}`);
@@ -33,9 +33,7 @@ export function getPlaza(count = 10, exclude?: string[]) {
 }
 
 export function getPaste(id: string) {
-  return fetchApi<{ id: string; title?: string; content?: string; renderedContent?: string; author?: ApiUser }>(
-    `/paste/query/${id}`,
-  );
+  return fetchApi<ApiPaste>(`/paste/query/${id}`);
 }
 
 export function getPasteCount() {

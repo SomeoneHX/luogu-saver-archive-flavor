@@ -23,6 +23,17 @@ export interface ApiUser {
   updatedAt: string | number;
 }
 
+export interface ApiPaste {
+  id: string;
+  content?: string;
+  renderedContent?: string;
+  deleted?: boolean;
+  deleteReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  author?: ApiUser;
+}
+
 export interface ApiArticle {
   id: string;
   title: string;

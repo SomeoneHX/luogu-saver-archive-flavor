@@ -16,9 +16,9 @@ import SearchPage from "@/pages/SearchPage";
 import ArticlePage from "@/pages/ArticlePage";
 import UserPage from "@/pages/UserPage";
 import DocPage from "@/pages/DocPage";
+import PastePage from "@/pages/PastePage";
 import {
   DiscussionPlaceholder,
-  PastePlaceholder,
 } from "@/pages/PlaceholderPages";
 import JudgementPage from "@/pages/JudgementPage";
 import { NotFoundTemplate } from "@/components/error/not-found-template";
@@ -61,7 +61,7 @@ const router = createBrowserRouter(
       { path: "/a/:id", element: <><ScrollToTop /><ArticlePage /></> },
       { path: "/u/:id", element: <><ScrollToTop /><UserPage /></> },
       { path: "/d/:id", element: <><RouteTitle title="讨论" /><DiscussionPlaceholder /></> },
-      { path: "/p/:id", element: <><RouteTitle title="剪贴板" /><PastePlaceholder /></> },
+      { path: "/p/:id", element: <><ScrollToTop /><RouteTitle title="剪贴板" /><PastePage /></> },
       { path: "/judgement", element: <><RouteTitle title="陶片放逐" /><JudgementPage /></> },
       { path: "/about", element: <><RouteTitle title="关于" /><DocPage /></> },
       { path: "/takedown", element: <><RouteTitle title="删除政策" /><DocPage /></> },
