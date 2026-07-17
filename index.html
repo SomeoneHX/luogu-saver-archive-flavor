@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>洛谷仓库</title>
+    <script>
+      // Set theme before paint to avoid flash. Mirrors next-themes default behavior.
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var theme = stored ? JSON.parse(stored).state.theme : null;
+          var resolved =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches) ||
+            (!theme &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches)
+              ? "dark"
+              : "light";
+          if (resolved === "dark") document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
