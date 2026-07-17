@@ -7,7 +7,6 @@ import { BreadcrumbSetter } from "@/components/layout/breadcrumb-context";
 import UserInlineLink, { type UserBasicInfo } from "@/components/user/user-inline-link";
 import { Button } from "@/components/ui/button";
 import { useClipboard } from "@/hooks/use-clipboard";
-import { enqueueJudgementRefresh } from "@/api/task";
 import { ABSOLUTE_DATE_FORMATTER, formatRelativeTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { getPermissionNames } from "@/lib/judgement";
@@ -149,9 +148,6 @@ function OperationPanel({ stat }: { stat: { totalRecords: number; totalFetches: 
   const { copy: copyLink, copied: copiedLink } = useClipboard();
   const originalLink = "https://www.luogu.com.cn/judgement";
   const archiveLink = "https://luogu.store/judgement";
-  const triggerRefresh = React.useCallback(() => {
-    void enqueueJudgementRefresh();
-  }, []);
 
   return (
     <div>
@@ -180,14 +176,6 @@ function OperationPanel({ stat }: { stat: { totalRecords: number; totalFetches: 
           onClick={() => window.open(originalLink, "_blank", "noreferrer,noopener")}
         >
           <Reply className="size-4" aria-hidden="true" /> 查看原页面
-        </Button>
-        <Button
-          variant="outline"
-          className="cursor-pointer justify-start gap-2 rounded-2xl py-2"
-          type="button"
-          onClick={triggerRefresh}
-        >
-          <Loader2 className="size-4" aria-hidden="true" /> 更新陶片放逐
         </Button>
         <Button
           variant="outline"
