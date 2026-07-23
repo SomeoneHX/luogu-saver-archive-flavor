@@ -72,7 +72,7 @@ export function getJudgements(params: JudgementQuery = {}) {
   return fetchJudgementEnvelope<{
     data: ApiJudgementRecord[];
     pagination: { page: number; limit: number; total: number; total_pages: number };
-  }>(`/api/judgement${buildQuery(params)}`).then((res) => ({
+  }>(`/judgement${buildQuery(params)}`).then((res) => ({
     records: res.data,
     page: res.pagination.page,
     limit: res.pagination.limit,
