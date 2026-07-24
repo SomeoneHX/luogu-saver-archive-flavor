@@ -8,9 +8,9 @@ const JUDGEMENT_API_BASE =
   import.meta.env.VITE_JUDGEMENT_API_URL || "https://jdmt.luogu.me";
 
 interface JudgementEnvelope<T> {
-  success: boolean;
-  data?: T;
+  code: number;
   message?: string;
+  data: T;
 }
 
 async function fetchJudgement<T>(path: string): Promise<T> {
@@ -23,26 +23,10 @@ async function fetchJudgement<T>(path: string): Promise<T> {
   } catch {
     throw new Error(`请求失败（${res.status}）`);
   }
-  if (!json?.success || !json.data) {
+  if (json?.code !== 200 || !json.data) {
     throw new Error(json?.message || `请求失败（${res.status}）`);
   }
   return json.data;
-}
-
-async function fetchJudgementEnvelope<T>(path: string): Promise<T> {
-  const res = await fetch(`${JUDGEMENT_API_BASE}${path}`, {
-    headers: { Accept: "application/json" },
-  });
-  let json: T & JudgementEnvelope<unknown> | null = null;
-  try {
-    json = (await res.json()) as T & JudgementEnvelope<unknown>;
-  } catch {
-    throw new Error(`请求失败（${res.status}）`);
-  }
-  if (!json?.success) {
-    throw new Error(json?.message || `请求失败（${res.status}）`);
-  }
-  return json;
 }
 
 export interface JudgementQuery {
@@ -69,27 +53,30 @@ function buildQuery(params: JudgementQuery): string {
 }
 
 export function getJudgements(params: JudgementQuery = {}) {
-  return fetchJudgementEnvelope<{
-    data: ApiJudgementRecord[];
-    pagination: { page: number; limit: number; total: number; total_pages: number };
+  return fetchJudgement<{
+    items: ApiJudgementRecord[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
   }>(`/judgement${buildQuery(params)}`).then((res) => ({
-    records: res.data,
+    records: res.items,
     page: res.pagination.page,
     limit: res.pagination.limit,
     total: res.pagination.total,
-    totalPages: res.pagination.total_pages,
+    totalPages: res.pagination.totalPages,
   }));
 }
 
 export function getJudgementStats(): Promise<ApiJudgementStats> {
-  return fetchJudgement<Record<string, number>>("/api/stats").then((raw) => ({
-    totalRecords: raw.total_judgements ?? raw.totalRecords ?? raw.total ?? 0,
-    totalFetches: raw.total_fetch_logs ?? raw.totalFetches ?? raw.fetches ?? 0,
+  return fetchJudgement<{
+    totalJudgements: number;
+    totalFetchLogs: number;
+  }>("/judgement/stats").then((raw) => ({
+    totalRecords: raw.totalJudgements,
+    totalFetches: raw.totalFetchLogs,
   }));
 }
 
 export function getJudgementLogs(page = 1, limit = 50) {
   return fetchJudgement<ApiJudgementLogs>(
-    `/api/logs?page=${page}&limit=${limit}`,
+    `/judgement/logs?page=${page}&limit=${limit}`,
   );
 }
